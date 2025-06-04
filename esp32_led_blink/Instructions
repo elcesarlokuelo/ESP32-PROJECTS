@@ -1,3 +1,0 @@
-This code is the most basic thing you can do.
-It uses the integrated led in the ESP32 DEVKIT V1, turning it on for a second and turning it off another second.
-It doesn need any circuit.
