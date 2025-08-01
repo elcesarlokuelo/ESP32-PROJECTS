@@ -1,0 +1,18 @@
+This is the dessign details to create a digital thermometer using the esp32
+devkit v1 and a NTC termistor.
+First we must know the characteristics of our termistor. For that i looked
+over the internet until i found the datasheet for my NTC model. In the
+datasheet i can see the Resistance to Temperature relation, and other
+necessary parameters like the Beta parameter or the resistance value at
+25ºC. In my case this was 20k ohms. With that i can now simulate the
+variation in resistance using LTSpice, and try to create the base circuit. I tried different circuits to linearize the Voltage values seen by the ADC converter of the esp32. Finally i arrived at the conclusion that a voltaje divider was the better option. 
+Then we have to dessign the interpretation function for the microcontroller. We have this data:
+
+Beta equation: R = R₀ * e^(β * (1/T - 1/T₀));
+Here we have Ro=20k, β=3950, T is the temperature i want to know, and T0=298.15K, or 25ºC.
+The voltage output of the voltage divider is: Vout=3.3*(10k/(10K+R)) where R is the value of the thermistor.
+The ADC in the esp32 is a 12bit ADC with an entry range of 0 to 3.3V. In the LTSpice simulation we have seen that the output range of the circuit is in that range. Now we need the next equation to see the digital value output from the ADC. Dout=Vout*((2^12)-1/3.3). So now the microcontroller has to calculate the T value form the equation that relates Dout to T. I used ChatGPT to get the full equation of T, that is:
+TempK = 1.0 / ((1.0 / 298.15) + (1.0 / 3950.0) * log(R / 20000.0));
+Now we have to translate form ºK to ºC using the next equation.
+Temp = TempK - 273.15;
+An extra step i took was to get 10 consecutive readings of the temperature and doing the average of the readings. This is to make the readings more stable.   
